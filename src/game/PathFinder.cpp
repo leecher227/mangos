@@ -16,9 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "MoveMap.h"
+#include "GridMap.h"
 #include "Creature.h"
 #include "PathFinder.h"
-#include "Map.h"
+
 #include "../recastnavigation/Detour/Include/DetourCommon.h"
 
 ////////////////// PathInfo //////////////////
@@ -36,11 +38,12 @@ PathInfo::PathInfo(const Unit* owner, const float destX, const float destY, cons
 
     PATH_DEBUG("++ PathInfo::PathInfo for %u \n", m_sourceUnit->GetGUID());
 
-    const TerrainInfo* terrain = m_sourceUnit->GetTerrain();
-    if (terrain->IsPathfindingEnabled())
+    uint32 mapId = m_sourceUnit->GetMapId();
+    if (MMAP::MMapFactory::IsPathfindingEnabled(mapId))
     {
-        m_navMesh = terrain->GetNavMesh();
-        m_navMeshQuery = terrain->GetNavMeshQuery();
+        MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
+        m_navMesh = mmap->GetNavMesh(mapId);
+        m_navMeshQuery = mmap->GetNavMeshQuery(mapId);
     }
 
     if (m_navMesh && m_navMeshQuery)
@@ -165,9 +168,10 @@ dtPolyRef PathInfo::getPolyByLocation(const float* point, float *distance)
     // first try with low search box
     float extents[VERTEX_SIZE] = {3.0f, 5.0f, 3.0f};    // bounds of poly search area
     dtQueryFilter filter = createFilter();
-    float closestPoint[VERTEX_SIZE];
+    float closestPoint[VERTEX_SIZE] = {0.0f, 0.0f, 0.0f};
 
-    if(DT_SUCCESS == m_navMeshQuery->findNearestPoly(point, extents, &filter, &polyRef, closestPoint))
+    dtStatus result = m_navMeshQuery->findNearestPoly(point, extents, &filter, &polyRef, closestPoint);
+    if(DT_SUCCESS == result && polyRef != INVALID_POLYREF)
     {
         *distance = dtVdist(closestPoint, point);
         return polyRef;
@@ -176,7 +180,8 @@ dtPolyRef PathInfo::getPolyByLocation(const float* point, float *distance)
     // still nothing ..
     // try with bigger search box
     extents[1] = 200.0f;
-    if(DT_SUCCESS == m_navMeshQuery->findNearestPoly(point, extents, &filter, &polyRef, closestPoint))
+    result = m_navMeshQuery->findNearestPoly(point, extents, &filter, &polyRef, closestPoint);
+    if(DT_SUCCESS == result && polyRef != INVALID_POLYREF)
     {
         *distance = dtVdist(closestPoint, point);
         return polyRef;
@@ -219,7 +224,8 @@ void PathInfo::BuildPolyPath(PathNode startPos, PathNode endPos)
         {
             Creature* owner = (Creature*)m_sourceUnit;
 
-            if (m_sourceUnit->GetTerrain()->IsUnderWater(endPos.x, endPos.y, endPos.z))
+            PathNode p = (distToStartPoly > 7.0f) ? startPos : endPos;
+            if (m_sourceUnit->GetTerrain()->IsUnderWater(p.x, p.y, p.z))
             {
                 PATH_DEBUG("++ BuildPolyPath :: underWater case\n");
                 if (owner->CanSwim() || owner->IsPet())

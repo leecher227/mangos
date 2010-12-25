@@ -84,11 +84,16 @@ namespace MMAP
                 printf("%sWriting debug output...                       \r", tileString); \
             } while (false)
 
-            DEBUG_WRITE("hf", heightfield);
-            DEBUG_WRITE("chf", compactHeightfield);
-            DEBUG_WRITE("cs", contours);
-            DEBUG_WRITE("pmesh", polyMesh);
-            DEBUG_WRITE("dmesh", polyMeshDetail);
+            if(heightfield)
+                DEBUG_WRITE("hf", heightfield);
+            if(compactHeightfield)
+                DEBUG_WRITE("chf", compactHeightfield);
+            if(contours)
+                DEBUG_WRITE("cs", contours);
+            if(polyMesh)
+                DEBUG_WRITE("pmesh", polyMesh);
+            if(polyMeshDetail)
+                DEBUG_WRITE("dmesh", polyMeshDetail);
 
             #undef DEBUG_WRITE
         }
@@ -251,7 +256,8 @@ namespace MMAP
                        bool skipContinents      = false,
                        bool skipJunkMaps        = true,
                        bool skipBattlegrounds   = true,
-                       bool debugOutput         = false);
+                       bool debugOutput         = false,
+                       bool bigBaseUnit         = false);
 
             ~MapBuilder();
 
@@ -303,7 +309,7 @@ namespace MMAP
             // debug output
             void generateObjFile(uint32 mapID, uint32 tileX, uint32 tileY, MeshData meshData);
             void generateRealObj(uint32 mapID, uint32 tileX, uint32 tileY, MeshData meshData);
-            
+
             IVMapManager* m_vmapManager;
             TerrainBuilder* m_terrainBuilder;
 
@@ -316,6 +322,7 @@ namespace MMAP
             bool m_skipBattlegrounds;
 
             float m_maxWalkableAngle;
+            bool m_bigBaseUnit;
 
             // build performance - not really used for now
             rcContext* m_rcContext;
