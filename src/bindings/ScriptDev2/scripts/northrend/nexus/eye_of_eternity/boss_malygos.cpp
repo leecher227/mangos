@@ -315,7 +315,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
 
         m_lSparkPortalGUIDList.clear();
 
-        //DismountPlayers();
+        DismountPlayers();
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, NOT_STARTED);
@@ -352,7 +352,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
                 if (*itr)
                     m_lSparkPortalGUIDList.push_back((*itr)->GetGUID());
 
-        //DismountPlayers();
+        DismountPlayers();
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, IN_PROGRESS);
@@ -481,7 +481,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
             (*iter)->ForcedDespawn();
     }
 
-    /*void DismountPlayers()
+    void DismountPlayers()
     {
         // dismount players
         Map *pMap = m_creature->GetMap();
@@ -493,7 +493,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
                     if (Player* pPlayer = itr->getSource())
                         pPlayer->ExitVehicle();
         }
-    }*/
+    }
 
     void AntiMagicShell()
     {
@@ -917,7 +917,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
                             for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                                 if (Player* pPlayer = itr->getSource())
                                 {
-                                    //pPlayer->ExitVehicle();
+                                    pPlayer->ExitVehicle();
 
                                     if (Creature* pTemp = pPlayer->SummonCreature(NPC_WYRMREST_SKYTALON, pPlayer->GetPositionX(), pPlayer->GetPositionY(), FLOOR_Z, 0, TEMPSUMMON_TIMED_DESPAWN, 20000))
                                     {
@@ -1180,7 +1180,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
             else
                 m_uiStaticFieldTimer -= uiDiff;
 
-            /*if (m_uiSurgeOfPowerTimer <= uiDiff)
+            if (m_uiSurgeOfPowerTimer <= uiDiff)
             {
                 for (uint8 i = 0; i<=50; ++i)
                 {
@@ -1208,7 +1208,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
                 m_uiSurgeOfPowerTimer = urand(5000, 15000);
             }
             else
-                m_uiSurgeOfPowerTimer -= uiDiff;*/
+                m_uiSurgeOfPowerTimer -= uiDiff;
         }
 
         DoMeleeAttackIfReady();
@@ -1314,10 +1314,10 @@ struct MANGOS_DLL_DECL npc_nexus_lordAI : public ScriptedAI
 
     bool m_bIsRegularMode;
     
-    float m_fTargetOldX;
+    /*float m_fTargetOldX;
     float m_fTargetOldY;
     float m_fVehicleOldX;
-    float m_fVehicleOldY;
+    float m_fVehicleOldY;*/
     uint32 m_uiCheckTimer;
     uint32 m_uiArcaneShockTimer;
     uint32 m_uiHasteTimer;
@@ -1429,12 +1429,12 @@ struct MANGOS_DLL_DECL npc_scion_of_eternityAI : public ScriptedAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
-                //if (!pTarget->GetVehicle())
-                //{
+                if (!pTarget->GetVehicle())
+                {
                     int32 uiDmg = m_bIsRegularMode ? urand(14138, 15862) : urand(16965, 19035);
                     m_creature->CastCustomSpell(pTarget, SPELL_ARCANE_BARRAGE, &uiDmg, 0, 0, true);
                     m_uiArcaneBarrageTimer = urand(4000, 12000);
-                //}
+                }
             }
         }
         else

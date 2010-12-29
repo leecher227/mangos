@@ -41,7 +41,6 @@
 #include <list>
 #include <set>
 
-class Creature;
 class Unit;
 class WorldPacket;
 class InstanceData;
